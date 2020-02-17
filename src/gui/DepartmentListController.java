@@ -48,7 +48,8 @@ public class DepartmentListController implements Initializable {
 	public void onBtnNewAction(ActionEvent event) {
 
 		Stage parentStage = Utils.currentStage(event);
-		createDialogForm("/gui/DepartmentForm.fxml", parentStage);
+		Department obj = new Department();
+		createDialogForm(obj, "/gui/DepartmentForm.fxml", parentStage);
 
 	}
 
@@ -85,18 +86,22 @@ public class DepartmentListController implements Initializable {
 
 	}
 
-	private void createDialogForm(String path, Stage parentStage) {
+	private void createDialogForm(Department obj, String path, Stage parentStage) {
 		try {
-
+			
 			FXMLLoader loader = new FXMLLoader(getClass().getResource(path));
 			Pane pane = loader.load();
+			
+			DepartmentFormController controller = loader.getController();
+			controller.setDepartmentEntity(obj);
+			controller.updateFormData();
 
 			Stage dialogStage = new Stage();
 			dialogStage.setTitle("Enter Department data");
 			dialogStage.setScene(new Scene(pane));
-			dialogStage.setResizable(false);
-			dialogStage.initOwner(parentStage);
-			dialogStage.initModality(Modality.WINDOW_MODAL);
+			dialogStage.setResizable(false); //não deixa redimensionar a tela
+			dialogStage.initOwner(parentStage); //informa quem é o Stage que gerou a ação
+			dialogStage.initModality(Modality.WINDOW_MODAL); //tela fixa, não podendo acessar as demais telas
 			dialogStage.showAndWait();
 		
 		} catch (IOException e) {
