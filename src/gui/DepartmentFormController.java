@@ -1,9 +1,12 @@
 package gui;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import db.DbException;
+import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Constraints;
 import gui.util.Utils;
@@ -16,12 +19,14 @@ import javafx.scene.control.TextField;
 import model.entities.Department;
 import model.services.DepartmentService;
 
-public class DepartmentFormController implements Initializable {
+public class DepartmentFormController implements Initializable{
 
 	
 	private Department entityDepartment;
 	
 	private DepartmentService service;
+	
+	private List<DataChangeListener> dataChangeListeners = new ArrayList<DataChangeListener>();
 	
 	@FXML
 	private TextField txtId;
@@ -43,10 +48,14 @@ public class DepartmentFormController implements Initializable {
 		this.service = service;
 	}
 	
+	public void subscribeDataChangeListener(DataChangeListener listener) {
+		dataChangeListeners.add(listener);
+	}
+	
 	@FXML
 	public void onBtSaveAction(ActionEvent event) {
-		if(entityDepartment.getName() == null) {
-			throw new IllegalStateException("Entity is null");
+		if(entityDepartment == null) {
+			throw new IllegalStateException("Entity is null"); 
 		}
 		if(service == null) {
 			throw new IllegalStateException("Service is null");
@@ -56,6 +65,7 @@ public class DepartmentFormController implements Initializable {
 			
 			entityDepartment = getFormData();
 			service.saveOrUpdate(entityDepartment);
+			notifyDataChangeListeners();
 			Utils.currentStage(event).close();
 			
 		} catch (DbException e) {
@@ -64,6 +74,13 @@ public class DepartmentFormController implements Initializable {
 		
 	}
 	
+	private void notifyDataChangeListeners() {
+		for(DataChangeListener listener : dataChangeListeners) {
+			listener.onDataChanged();
+		}
+		
+	}
+
 	private Department getFormData() {
 		
 		Department obj = new Department();
